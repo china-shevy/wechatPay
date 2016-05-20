@@ -395,14 +395,14 @@ class WechatPay {
 	 */
 	public function getAppPayParams( $prepayid ){
 		$data = [];
+		$data['timestamp'] = time();
 		$data['appid']     = $this->_config["appid"];
 		$data['partnerid'] = $this->_config["mch_id"];
-		$data['prepayid']  = $prepayid;
 		$data['package']   = 'Sign=WXPay';
+		$data['prepayid']  = $prepayid;
 		$data['noncestr']  = $this->getNonceString();
-		$data['timestamp'] = time();
-		$data['sign']      = $this->sign( $data ); 
-		return $this->arr2UrlParams($data);
+		$data['sign']      = $this->sign( $data );
+		return $this->arr2UrlParams($data,1);
 	}
 
 	/**
@@ -410,11 +410,15 @@ class WechatPay {
 	 * @param	$params
 	 * @return	string
 	 */
-	public function arr2UrlParams( $params ){
+	public function arr2UrlParams( $params, $isEncode = 0){
 		$string = '';
 		foreach ($params as $k => $v) {
-			if ($v && trim($v)!='') {
-				$string .= "$k=$v&";
+			if (!is_array($v) && trim($v)!='') {
+				if($isEncode){
+					$string .= "{$k}=".urlencode($v)."&";
+				}else{
+					$string .= "{$k}={$v}&";
+				}
 			}
 		}
 		return rtrim($string,'&');
